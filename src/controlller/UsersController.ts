@@ -1,26 +1,21 @@
 import { Request, Response } from "express";
 import { BaseError } from "../errors/BaseError";
 import { UsersBusiness } from "../business/UsersBusiness";
-import { CreateUserInputDTO } from "../dto/createUser.dto";
+import {
+  CreateUserInputSchema
+} from "../dto/createUser.dto";
 
 export class UsersController {
   constructor(private usersBusiness: UsersBusiness) {}
 
   public createUser = async (req: Request, res: Response) => {
     try {
-      const {
-        name,
-        email,
-        password,
-        role,
-      }: { name: string; email: string; password: string; role: string } =
-        req.body;
-      const input: CreateUserInputDTO = {
-        name,
-        email,
-        password,
-        role,
-      };
+      const input = CreateUserInputSchema.parse({
+        name: req.body.name,
+        email: req.body.email,
+        password: req.body.password,
+        role: req.body.role
+      });
 
       const output = await this.usersBusiness.createUser(input);
 

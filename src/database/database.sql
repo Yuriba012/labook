@@ -53,20 +53,6 @@ CREATE TABLE likes_dislikes(
 
 DROP TABLE likes_dislikes;
 
--- INSERT INTO likes_dislikes(user_id, post_id, like)
--- VALUES
---     ('u001', 'p002', '1'),
---     ('u001', 'p003', '1'),
---     ('u002', 'p003', '1'),
---     ('u002', 'p006', '1'),
---     ('u003', 'p003', '0'),
---     ('u004', 'p005', '0'),
---     ('u004', 'p001', '0'),
---     ('u003', 'p004', '0'),
---     ('u002', 'p006', '0'),
---     ('u001', 'p006', '0'),
---     ('u003', 'p002', '0'),
-
 SELECT 
     posts.id,
     posts.content,
@@ -79,3 +65,5 @@ SELECT
  FROM posts
 LEFT JOIN users
 ON posts.creator_id = users.id;
+
+SELECT * FROM likes_dislikes;
