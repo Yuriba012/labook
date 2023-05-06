@@ -148,3 +148,6 @@ dist
 .tern-port
 
 .vscode
+
+# Database
+database.db

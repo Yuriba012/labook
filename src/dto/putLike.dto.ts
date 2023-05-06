@@ -1,13 +1,31 @@
-import z from 'zod'
+import z from "zod";
 
 export interface PutLikeInputDTO {
-    userId: string,
-    postId: string,
-    like: boolean
+  postId: string;
+  like: boolean;
+  token: string;
 }
 
-export const PutLikeInputSchema = z.object({
-    userId: z.string().min(0),
-    postId: z.string().min(0),
-    like: z.boolean()
-})
+export interface PutLikeOutputDTO{
+  message: string
+}
+
+export const PutLikeInputSchema = z
+  .object({
+    postId: z.string({
+      required_error:
+        "'postId' é obrigatório para efetuar a requisição",
+      invalid_type_error: "'postId' deve ser do tipo string",
+    }).min(0),
+    like: z.boolean({
+      required_error:
+        "'like' é obrigatório para efetuar a requisição",
+      invalid_type_error: "'like' deve ser do tipo boolean",
+    }),
+    token: z.string({
+      required_error:
+        "Um token válido é obrigatório para efetuar a requisição",
+      invalid_type_error: "Token deve ser do tipo string",
+    }).min(0)
+  })
+  .transform((data) => data as PutLikeInputDTO);
