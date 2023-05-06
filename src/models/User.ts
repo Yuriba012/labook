@@ -1,10 +1,12 @@
+import { USER_ROLE } from "../types/USER_ROLE";
+
 export class User {
   constructor(
     private id: string,
     private name: string,
     private email: string,
     private password: string,
-    private role: string,
+    private role: USER_ROLE,
     private createdAt: string
   ) {}
   public getId(): string {
@@ -19,7 +21,7 @@ export class User {
   public getPassword(): string {
     return this.password;
   }
-  public getRole(): string {
+  public getRole(): USER_ROLE {
     return this.role;
   }
   public getCreatedAt():string{
@@ -37,7 +39,7 @@ export class User {
   public setPassword(newPassword: string): void {
     this.password = newPassword;
   }
-  public setRole(newRole: string): void {
+  public setRole(newRole: USER_ROLE): void {
     this.role = newRole;
   }
 }

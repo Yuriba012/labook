@@ -1,4 +1,4 @@
-import { InputLike } from "../types/InputLike";
+import { InputLikeDB } from "../types/InputLikeDB";
 import { LikeDB } from "../types/LikeDB";
 import {
   EditedPostToDB,
@@ -26,7 +26,7 @@ export class PostsDatabase extends BaseDatabase {
           "posts.likes",
           "posts.dislikes",
           "posts.created_at",
-          "posts.uploaded_at",
+          "posts.updated_at",
           "posts.creator_id",
           "users.name"
         )
@@ -63,7 +63,7 @@ export class PostsDatabase extends BaseDatabase {
     await BaseDatabase.connection(PostsDatabase.TABLE_POSTS).insert(newPost);
   };
 
-  public getPostByIdWithName = async (
+  public getPostByIdOutputForm = async (
     id: string
   ): Promise<PostOutputDB | undefined> => {
     const [postDB]: PostOutputDB[] = await BaseDatabase.connection(
@@ -83,12 +83,12 @@ export class PostsDatabase extends BaseDatabase {
       .leftJoin(PostsDatabase.TABLE_USERS, (post_user) => {
         post_user.on("posts.creator_id", "=", "users.id");
       })
-      .where({ id });
+      .where("posts.id", "=", id);
 
     return postDB;
   };
 
-  public getPostByIdRaw = async (
+  public getPostByIdDBForm = async (
     id: string
   ): Promise<PostRawDB | undefined> => {
     const [postDB]: PostRawDB[] = await BaseDatabase.connection(
@@ -106,10 +106,10 @@ export class PostsDatabase extends BaseDatabase {
       .where({ id: idToEdit });
   };
 
-  public async getLike(input: InputLike): Promise<InputLike | undefined> {
+  public getLike = async (input: InputLikeDB): Promise<InputLikeDB | undefined> => {
     const { userId, postId } = input;
 
-    let output: InputLike | undefined;
+    let output: InputLikeDB | undefined;
 
     const [likeDB]: LikeDB[] | undefined = await BaseDatabase.connection(
       PostsDatabase.TABLE_LIKES_DISLIKES
@@ -127,7 +127,7 @@ export class PostsDatabase extends BaseDatabase {
     return output;
   }
 
-  public async createLike(input: InputLike): Promise<void> {
+  public createLike = async (input: InputLikeDB): Promise<void> => {
     const { userId, postId, like } = input;
 
     const likeDB: LikeDB = {
@@ -141,7 +141,7 @@ export class PostsDatabase extends BaseDatabase {
     );
   }
 
-  public async addLikeInPost(input: InputLike): Promise<void> {
+  public addLikeInPost = async (input: InputLikeDB): Promise<void> => {
     const { postId, like } = input;
 
     if (like) {
@@ -169,7 +169,7 @@ export class PostsDatabase extends BaseDatabase {
     }
   }
 
-  public async deleteLike(input: InputLike): Promise<void> {
+  public deleteLike = async (input: InputLikeDB): Promise<void> => {
     const { userId, postId } = input;
 
     await BaseDatabase.connection(PostsDatabase.TABLE_LIKES_DISLIKES)
@@ -177,7 +177,7 @@ export class PostsDatabase extends BaseDatabase {
       .where({ user_id: userId, post_id: postId });
   }
 
-  public async decreaseLikeInPost(input: InputLike): Promise<void> {
+  public decreaseLikeInPost = async (input: InputLikeDB): Promise<void> => {
     const { postId, like } = input;
 
     if (like) {
@@ -205,7 +205,7 @@ export class PostsDatabase extends BaseDatabase {
     }
   }
 
-  public async changeLike(input: InputLike): Promise<void> {
+  public changeLike = async (input: InputLikeDB): Promise<void> => {
     const { userId, postId, like } = input;
 
     const newLike = +like;
@@ -215,7 +215,7 @@ export class PostsDatabase extends BaseDatabase {
       .where({ user_id: userId, post_id: postId });
   }
 
-  public async overwriteLikeInPost(input: InputLike): Promise<void> {
+  public overwriteLikeInPost = async (input: InputLikeDB): Promise<void> => {
     const { postId, like } = input;
 
     if (like) {
@@ -243,5 +243,9 @@ export class PostsDatabase extends BaseDatabase {
         .update({ likes: amount.likes, dislikes: amount.dislikes })
         .where({ id: postId });
     }
+  }
+
+  public deletePost = async (idToDelete: string): Promise<void> => {
+    await BaseDatabase.connection(PostsDatabase.TABLE_POSTS).delete().where({id: idToDelete});
   }
 }

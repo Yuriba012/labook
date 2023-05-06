@@ -1,25 +1,32 @@
 import { Request, Response } from "express";
 import { BaseError } from "../errors/BaseError";
 import { PostsBusiness } from "../business/PostsBusiness";
-import { GetPostsOutputDTO } from "../dto/getPosts.dto";
+import { GetPostsOutputDTO, GetPostsSchema } from "../dto/getPosts.dto";
 import { CreatePostInputSchema } from "../dto/createPost.dto";
 import { EditPostInputSchema } from "../dto/editPost.dto";
 import { PutLikeInputSchema } from "../dto/putLike.dto";
+import { ZodError } from "zod";
+import { DeletePostInputSchema } from "../dto/deletePost.dto";
 
 export class PostsController {
   constructor(private postsBusiness: PostsBusiness) {}
 
   public getPosts = async (req: Request, res: Response) => {
     try {
-      const query = req.query.q as string;
+      const input = GetPostsSchema.parse({
+        token: req.headers.authorization as string,
+        query: req.query.q as string
+      })
+
       const output: GetPostsOutputDTO[] = await this.postsBusiness.getPosts(
-        query
+        input
       );
       res.status(200).send(output);
     } catch (error) {
       console.log(error);
-
-      if (error instanceof BaseError) {
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
         res.status(error.statusCode).send(error.message);
       } else {
         res.status(500).send("Erro inesperado");
@@ -29,17 +36,21 @@ export class PostsController {
 
   public createPost = async (req: Request, res: Response) => {
     try {
-      const { content, creatorId } = req.body;
+      const content = req.body.content;
+      const token = req.headers.authorization;
       const input = CreatePostInputSchema.parse({
         content,
-        creatorId,
+        token
       });
-      await this.postsBusiness.createPost(input);
-      res.status(200).send("Post criado com sucesso.");
+      const output = await this.postsBusiness.createPost(input);
+      
+      res.status(200).send(output);
     } catch (error) {
       console.log(error);
 
-      if (error instanceof BaseError) {
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
         res.status(error.statusCode).send(error.message);
       } else {
         res.status(500).send("Erro inesperado");
@@ -52,15 +63,18 @@ export class PostsController {
       const input = EditPostInputSchema.parse({
         idToEdit: req.params.id,
         newContent: req.body.content,
+        token: req.headers.authorization
       });
 
-      await this.postsBusiness.editPost(input);
+      const output = await this.postsBusiness.editPost(input);
 
-      res.status(200).send("Post atualizado com sucesso.");
+      res.status(200).send(output);
     } catch (error) {
       console.log(error);
 
-      if (error instanceof BaseError) {
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
         res.status(error.statusCode).send(error.message);
       } else {
         res.status(500).send("Erro inesperado");
@@ -71,23 +85,47 @@ export class PostsController {
   public putLike = async (req: Request, res: Response) => {
     try {
       const input = PutLikeInputSchema.parse({
-        userId: req.body.userId,
         postId: req.params.id,
-        like: req.body.like
-      })
+        like: req.body.like,
+        token: req.headers.authorization
+      });
 
-      await this.postsBusiness.putLike(input);
+      const output = await this.postsBusiness.putLike(input);
 
-      res.status(200).send("Like inserido com sucesso.");
+      res.status(200).send(output);
     } catch (error) {
       console.log(error);
 
-      if (error instanceof BaseError) {
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
         res.status(error.statusCode).send(error.message);
       } else {
         res.status(500).send("Erro inesperado");
       }
     }
+  };
 
+  public deletePost = async (req: Request, res: Response) => {
+    try {
+      const input = DeletePostInputSchema.parse({
+        idToDelete: req.params.id as string,
+        token: req.headers.authorization as string
+      })
+
+      const output = await this.postsBusiness.deletePost(input);
+
+      res.status(200).send(output);
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message);
+      } else {
+        res.status(500).send("Erro inesperado");
+      }
+    }
   }
 }
