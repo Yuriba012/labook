@@ -15,8 +15,6 @@ O projeto consiste em uma API REST chamada de Labook que exerce algumas funciona
 - <a href="#tecnologias">Tecnologias Utilizadas</a>
 - <a href="#autor">Autor</a>
 
-- <a href="#proximos_passos">Próximos Passos</a>
-
 ## Funcionalidades do projeto (endpoints)
 
 - [x] Criar usuário;
