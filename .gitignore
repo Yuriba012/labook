@@ -150,4 +150,4 @@ dist
 .vscode
 
 # Database
-database.db
+/src/database/database.db
